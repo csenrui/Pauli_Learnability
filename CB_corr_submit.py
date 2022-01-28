@@ -229,7 +229,7 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 				job_save["L"] = L
 				job_save["c"] = c
 				#job_save["type"] = "cross_entropy_H"
-				#job_save["circuit"] = gates
+				job_save["circuit"] = circuit.qasm
 				job_save["clifford"] = Clifford(gates).to_dict()
 				job_save["pauli"] = pauliOp.to_label()
 				job_save["repeat"] = R
