@@ -20,7 +20,7 @@ import CB_submit, CB_corr_submit
 
 filename = 'ibmq_experiment_all_20220127'
 shots = 1000 # for measurement-based simulation only
-shots_intc = 8000
+shots_intc = 10000
 n = 2
 n_total = n
 #Lrange = list(range(2,39,4)) # len = 10
