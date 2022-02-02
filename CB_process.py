@@ -54,7 +54,7 @@ def process_CB(n, C, shots, batch, Lrange, cb_data, pauli_sample, pauli_request_
     for b in range(batch):
         print(b)
         data_batch = cb_data["batch_%d" % b]
-        result_batch = Result.from_dict(cb_data["result"][b])
+        result_batch = (cb_data["result"][b])
 
 
         circuit_count = 0  ### To extract data from result_batch
