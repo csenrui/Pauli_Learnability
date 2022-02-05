@@ -147,11 +147,13 @@ use_boostrap = False
 C_max = 0
 shots_max = 0
 
-fidelity_list = {} 
-stdev_list = {}
-intercept_list = {}
-intercept_std_list = {}
-   
+# fidelity_list = {} 
+# stdev_list = {}
+# intercept_list = {}
+# intercept_std_list = {}
+# covar_list = {}
+params_list = {}
+pcov_list = {}
 
 for tag in cb:
     print(tag)
@@ -170,53 +172,55 @@ for tag in cb:
 
 
     for sub_label in raw_fidelity_list.keys():
-        if (sub_label,parity) in fidelity_list:
+        if (sub_label,parity) in params_list:
             continue
         elif(sub_label == 'I'*n):
-            fidelity_list[(sub_label,parity)] = 1.0
-            stdev_list[(sub_label,parity)] = 0.0
-            intercept_list[(sub_label,parity)] = 1.0
-            intercept_std_list[(sub_label,parity)] = 0.0
+            params_list = np.array([1.0,1.0])
+            pcov_list = np.array([[0.0,0.0],[0.0,0.0]])
         else:
-            alpha, alpha_err, intercept, intercept_err = CB_process.fit_CB_2(Lrange, raw_fidelity_list[sub_label])
-            # print("CB for %dth Pauli:" % k, alpha, alpha_err)
-            fidelity_list[(sub_label,parity)] = alpha
-            stdev_list[(sub_label,parity)] = alpha_err
-            intercept_list[(sub_label,parity)] = intercept
-            intercept_std_list[(sub_label,parity)] = intercept_err
+            params, pcov = CB_process.fit_CB_all(Lrange, raw_fidelity_list[sub_label])
+            params_list[(sub_label,parity)] = params
+            pcov_list[(sub_label,parity)] = pcov
+            # note: parameters = (intercept, slope)
 
 noise_after_the_gate = True
 dec_fidelity_list = {}
+dec_stdev_list = {}
 for k in range(0,len(parity_pauli_sample_list),2):
     pp1 = parity_pauli_sample_list[k]
     pp2 = parity_pauli_sample_list[k+1]
-    f = (fidelity_list[pp1]+fidelity_list[pp2])/2
-    r = (intercept_list[pp2]/intercept_list[pp1])
+    # f = (fidelity_list[pp1]+fidelity_list[pp2])/2
+    # r = (intercept_list[pp2]/intercept_list[pp1])
+    f = (params_list[pp1][1] + params_list[pp2][1])/2
+    r = (params_list[pp2][0]/params_list[pp1][0])
     if noise_after_the_gate is True:
         lambda1 = f * r
         lambda2 = f / r
     else:
         lambda1 = f / r
         lambda2 = f * r
-    # todo: stdev analysis of these estimators
+    # propagation of uncertainty
+    s1, s2 =  CB_process.calculate_uncertainty(params_list[pp1],params_list[pp2],pcov_list[pp1],pcov_list[pp1])
+
     dec_fidelity_list[pp1[0]] = lambda1
     dec_fidelity_list[pp2[0]] = lambda2
+    dec_stdev_list[pp1[0]] = s1
+    dec_stdev_list[pp2[0]] = s2
 
 print("Label / Pauli infidelity / Std(fidelity) / Intercept / Std(intercept)")
 for pauli_label in parity_pauli_sample_list:
-    print(str(pauli_label)+" %.5f %.5f %.5f %.5f"%(1-fidelity_list[pauli_label], stdev_list[pauli_label], intercept_list[pauli_label], intercept_std_list[pauli_label]))
+    print(str(pauli_label)+" %.5f %.5f %.5f %.5f"%(1-params_list[pauli_label][1], np.sqrt(pcov_list[pauli_label][1,1]), 1-params_list[pauli_label][0], np.sqrt(pcov_list[pauli_label][0,0])))
 
 
-print("Label / Pauli infidelity (decoupled)")
+print("Label / Pauli infidelity (decoupled)/ Std")
 for pauli_label in parity_pauli_sample_list:
-    print(str(pauli_label[0])+" %.5f"%(1-dec_fidelity_list[pauli_label[0]]))
+    print(str(pauli_label[0])+" %.5f %.5f"%(1-dec_fidelity_list[pauli_label[0]],dec_stdev_list[pauli_label[0]]))
 
 result['intc_cb'] = {
-    "fidelity":     fidelity_list,
-    "stdev":        stdev_list,
-    "intercept":    intercept_list,
-    "intercept_stdev":  intercept_std_list,
+    "params":       params_list,
+    "pcov":         pcov_list,
     "dec_fidelity": dec_fidelity_list,
+    "dec_stdev":    dec_stdev_list,
     "n":            n,
     "n_total":      n_total,
     "Lrange":       Lrange,
