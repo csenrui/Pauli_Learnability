@@ -211,7 +211,7 @@ def process_CB(n, C, shots, batch, Lrange, cb_data, pauli_sample, pauli_request_
 def rcs_fit_fun(x, a, alpha):
         return a * (alpha ** x)
 
-def fit_CB_2(X, xeb_list):
+def fit_CB(X, xeb_list):
     Y = [np.mean(xeb_list[L]) for L in X]
     Yerr = [sem(xeb_list[L]) for L in X]
     #print(linregress(X,np.log(Y)))
@@ -222,11 +222,11 @@ def fit_CB_2(X, xeb_list):
     params_err = np.sqrt(np.diag(pcov))
     alpha_err = params_err[1]
 
-    intercept = params[0]
-    intercept_err = params_err[0]
+    # intercept = params[0]
+    # intercept_err = params_err[0]
     # print(params)
 
-    return alpha, alpha_err, intercept, intercept_err
+    return alpha, alpha_err
 
 def fit_CB_all(X, xeb_list):
     Y = [np.mean(xeb_list[L]) for L in X]
