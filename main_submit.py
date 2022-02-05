@@ -18,9 +18,9 @@ import itertools
 from qiskit.compiler import transpile
 import CB_submit, CB_corr_submit
 
-filename = 'ibmq_experiment_all_20220127'
-shots = 1000 # for measurement-based simulation only
-shots_intc = 10000
+
+shots = 100 
+shots_intc = 100
 n = 2
 n_total = n
 #Lrange = list(range(2,39,4)) # len = 10
@@ -36,18 +36,43 @@ batch = 1
 gset = "Pauli"
 q = qubit_maps['local']
 
-IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
-# provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='sys-reserve')
-provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
-# backend = provider.get_backend('ibmq_manila')
-backend = provider.get_backend('ibm_perth')
+
+
+######## simulator or ibmq
+use_simulator = True
+
+
+
+
+if use_simulator is True:
+    filename = 'simulation_all_20220131'
+    eps = 0.05
+    eps_readout = 0.01
+    noise_model = NoiseModel()
+    amp_noise_1q = amplitude_damping_error(eps)
+    noise_model.add_all_qubit_quantum_error(amp_noise_1q.tensor(amp_noise_1q),['cx'])
+    p0given1 = eps_readout
+    p1given0 = eps_readout
+    readout_noise_1q = ReadoutError([[1 - p1given0, p1given0], [p0given1, 1 - p0given1]])
+    noise_model.add_all_qubit_readout_error(readout_noise_1q)
+    backend = AerSimulator(method='density_matrix', noise_model=noise_model)
+else:
+    filename = 'ibmq_experiment_all_20220131'
+    IBMQ.load_account()
+    #provider = IBMQ.enable_account("9f9d2171bf92173c5c222a9f9eacc14e355482aea4571b77c408a3847555cb7ab46fc751f0bbebfa8741c41b29b3bb5332cf18d3bc775c19d7e5f819c840f535",hub='ibm-q-ornl', group='ornl', project='sys-reserve')
+
+    # provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
+    # provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='sys-reserve')
+    provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
+    # backend = provider.get_backend('ibmq_manila')
+
+    backend = provider.get_backend('ibm_perth')
+    job_manager = IBMQJobManager()
 
 print("CB, ", "n=%d" % n)
 print("simulation method:", backend.configuration().description)
 
 data = {}
-job_manager = IBMQJobManager()
 token = ''.join(random.choice([str(j) for j in range(10)]) for i in range(10))
 data['token'] = token
 filename += '_' + token
@@ -63,12 +88,18 @@ for pauli_sample in pauli_sample_list:
     Lrange = Leven
     repeat = repeat_even #not used
 
+
     cb_data, cb_circ_all = CB_submit.submit_cb(n,n_total,Lrange=Lrange,C=C,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False)
+
     print("created %d circuits" % len(cb_circ_all[0]))
 
     # print(cb_circ_all[0][0])
-    job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots, memory=True, backend=backend, name='cb', job_tags=[tag,token])
-    job_set_id = job_set.job_set_id()    
+    if use_simulator is True:
+        job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
+        result = job.result()
+    else:
+        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots, memory=True, backend=backend, name='cb', job_tags=[tag,token])
+        job_set_id = job_set.job_set_id()
 
     cb_data["parameters"] = {}
     cb_data["parameters"]['n'] = n 
@@ -79,12 +110,17 @@ for pauli_sample in pauli_sample_list:
     cb_data["parameters"]['repeat'] = repeat
     cb_data["parameters"]['pauli'] = pauli_sample
 
-    cb_data["job_set_id"] = job_set_id
+    if use_simulator is True:
+        cb_data["result"] = [result]
+    else:
+        cb_data["job_set_id"] = job_set_id
 
+
+    
     data['cb'][tag] = cb_data
     # test: data saving
 
-    print(cb_data)
+    # print(cb_data)
 
     
 
@@ -102,9 +138,13 @@ for pauli_sample in pauli_sample_list:
     cb_data, cb_circ_all = CB_corr_submit.submit_cb(n,n_total,Lrange=Lrange,C=C,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False)
     print("created %d circuits" % len(cb_circ_all[0]))
 
+    if use_simulator is True:
+        job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
+        result = job.result()
+    else:
     # print(cb_circ_all[0][0])
-    job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots, memory=True, backend=backend, name='int_cb', job_tags=[tag,token])
-    job_set_id = job_set.job_set_id()    
+        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots, memory=True, backend=backend, name='int_cb', job_tags=[tag,token],job_share_level='project')
+        job_set_id = job_set.job_set_id()    
 
     cb_data["parameters"] = {}
     cb_data["parameters"]['n'] = n 
@@ -114,13 +154,16 @@ for pauli_sample in pauli_sample_list:
     cb_data["parameters"]['C'] = C 
     cb_data["parameters"]['repeat'] = repeat
     cb_data["parameters"]['pauli'] = pauli_sample
-
-    cb_data["job_set_id"] = job_set_id
+    
+    if use_simulator is True:
+        cb_data["result"] = [result]
+    else:
+        cb_data["job_set_id"] = job_set_id
 
     data['int_cb'][tag] = cb_data
     # test: data saving
 
-    print(cb_data)
+    # print(cb_data)
 
 
 ####################### experiment3: intercept CB
@@ -138,9 +181,13 @@ for pauli_sample, parity in parity_pauli_sample_list:
     cb_data, cb_circ_all = CB_submit.submit_cb(n,n_total,Lrange=Lrange,C=C_intc,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False)
     print("created %d circuits" % len(cb_circ_all[0]))
 
+    if use_simulator is True:
+        job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
+        result = job.result()
+    else:
     # print(cb_circ_all[0][0])
-    job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots_intc, memory=True, backend=backend, name='intc_cb', job_tags=[tag,token])
-    job_set_id = job_set.job_set_id()    
+        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots_intc, memory=True, backend=backend, name='intc_cb', job_tags=[tag,token],job_share_level='project')
+        job_set_id = job_set.job_set_id()    
 
     cb_data["parameters"] = {}
     cb_data["parameters"]['n'] = n 
@@ -152,14 +199,22 @@ for pauli_sample, parity in parity_pauli_sample_list:
     cb_data["parameters"]['pauli'] = pauli_sample
     cb_data["parameters"]['parity'] = parity
 
-    cb_data["job_set_id"] = job_set_id
+    if use_simulator is True:
+        cb_data["result"] = [result]
+    else:
+        cb_data["job_set_id"] = job_set_id
 
     data['intc_cb'][tag] = cb_data
     # test: data saving
 
-    print(cb_data)
+    # print(cb_data)
 
 
 ####################### save data
-with open('data/' + filename, 'wb') as outfile:
-    pickle.dump(data, outfile)
+
+if use_simulator is True:
+    with open('data/' + filename + '_full', 'wb') as outfile:
+        pickle.dump(data, outfile)
+else:
+    with open('data/' + filename, 'wb') as outfile:
+        pickle.dump(data, outfile)
