@@ -228,138 +228,61 @@ def fit_CB_2(X, xeb_list):
 
     return alpha, alpha_err, intercept, intercept_err
 
-def fit_CB(X, xeb_list):
+def fit_CB_all(X, xeb_list):
     Y = [np.mean(xeb_list[L]) for L in X]
     Yerr = [sem(xeb_list[L]) for L in X]
     #print(linregress(X,np.log(Y)))
-    try:
-        params, pcov = curve_fit(rcs_fit_fun, X, Y, sigma=Yerr, absolute_sigma=True, p0=[1,1])
-        alpha = params[1]
-        params_err = np.sqrt(np.diag(pcov))
-        alpha_err = params_err[1]
-
-    except RuntimeError:
-        alpha = 1.0
-        alpha_err = 0.0
-
+    params, pcov = curve_fit(rcs_fit_fun, X, Y, sigma=Yerr, absolute_sigma=True, p0=[1,1])
+    #params, pcov = curve_fit(rcs_fit_fun, X, Y, absolute_sigma=True, p0=[1,1])
     # print(params)
+    return params, pcov
 
-    return alpha, alpha_err
-
-    print(alpha, alpha_err)
-
-    # params, pcov = curve_fit(rcs_fit_fun, X, Y, sigma=Ystd, absolute_sigma=False, p0=[1,1,0])
-
-    # alpha = params[1]
-    # params_err = np.sqrt(np.diag(pcov))
-    # alpha_err = params_err[1] / alpha
-
-    # print(params)
-
-    # print(alpha, alpha_err)
-
-
-
-    # sys.exit(0)
-
-    # for L in range(5,14):
-    # 	print(len(cross_entropy_list[L]))
-    # sys.exit(0)
-    
-    # for L in X:
-    # 	print(np.std(cross_entropy_list[L]), sem(cross_entropy_list[L]))
-    # sys.exit(0)
-
-    # print(np.split())
-    
-
-    # Y = [np.mean(entropy_list[L]) for L in X]
-    # Yerr = [sem(entropy_list[L]) for L in X]
-
-    # Y = [np.median([np.mean(S) for S in np.split(np.array(cross_entropy_list[L]),4)]) for L in X]
-
-    
-    # print(linregress(X,np.log(Y)))
-    # print("slope:", (np.log(Y[14])-np.log(Y[4]))/(X[14]-X[4]))
-
-##############################
-    # X = Lrange
-    # Y = [np.mean(cross_entropy_list[L]) for L in X]
-    # Yerr = [sem(cross_entropy_list[L]) for L in X]
-    # print(linregress(X[4:],np.log(Y[4:])))
-    # plt.errorbar(X,Y,yerr=Yerr)
-    # plt.plot(X, Y, label='n=%d' % n)
-    # plt.xlim(X[0]-0.1,X[-1]+0.1)
-    # plt.yscale("log")
-    # plt.ylabel("cross entropy")
-    # plt.xlabel("depth")
-    # plt.legend()
-    # plt.show()
-################################
-
-# job_save["n"] = n
-# job_save["L"] = L
-# job_save["c"] = c
-# job_save["type"] = "cross_entropy"
-# job_save["circuit"] = gates
-# job_save["job_id"] = job_id
-
-# data_save.append(job_save)
-# num_jobs += 1
-# print(num_jobs)
-
-# data = {}
-# data["data"] = data_save
-# with open('data_cross_entropy.txt', 'w') as outfile:
-#     json.dump(data, outfile)
+def calculate_uncertainty(ave1,ave2,cov1,cov2):
+    int1,lam1 = ave1
+    int2,lam2 = ave2
+    alam = (lam1 + lam2) / 2
+    vint1,vlam1 = np.diag(cov1)
+    vint2,vlam2 = np.diag(cov2)
+    covar1 = cov1[0,1]
+    covar2 = cov2[0,1]
+    # Formula by Taylor expansion
+    v1 = int2**2/int1**2/4 * (vlam1 + vlam2) + alam**2*int2**2/int1**4 * vint1 + alam**2/int1**2 * vint2 + \
+        alam * (-int2**2/int1**3 * covar1 + int2/int1**2 * covar2)
+    v2 = int1**2/int2**2/4 * (vlam1 + vlam2) + alam**2*int1**2/int2**4 * vint2 + alam**2/int2**2 * vint1 + \
+        alam * (-int1**2/int2**3 * covar2 + int1/int2**2 * covar1)
+    return np.sqrt(v1), np.sqrt(v2)
 
 
-# print(gates)
-# print(len(gates))
-# sys.exit(0)
+# def fit_CB(X, xeb_list):
+#     Y = [np.mean(xeb_list[L]) for L in X]
+#     Yerr = [sem(xeb_list[L]) for L in X]
+#     #print(linregress(X,np.log(Y)))
+#     try:
+#         params, pcov = curve_fit(rcs_fit_fun, X, Y, sigma=Yerr, absolute_sigma=True, p0=[1,1])
+#         alpha = params[1]
+#         params_err = np.sqrt(np.diag(pcov))
+#         alpha_err = params_err[1]
 
-# circuit.decompose().decompose().draw(output="mpl",filename="circuit.png")
+#     except RuntimeError:
+#         alpha = 1.0
+#         alpha_err = 0.0
 
-# print(circuit.depth())
+#     # print(params)
 
-# sys.exit(0)
+#     return alpha, alpha_err
+
+#     print(alpha, alpha_err)
+
+#     # params, pcov = curve_fit(rcs_fit_fun, X, Y, sigma=Ystd, absolute_sigma=False, p0=[1,1,0])
+
+#     # alpha = params[1]
+#     # params_err = np.sqrt(np.diag(pcov))
+#     # alpha_err = params_err[1] / alpha
+
+#     # print(params)
+
+#     # print(alpha, alpha_err)
 
 
-# job = execute(circuit, backend, shots=8192)
-# job_id = job.job_id()
-# result = job.result()
-# # vec = result.get_statevector()
 
-# print(result)
-# sys.exit(0)
-
-# def predict_fidelity(n,L,q,epgs_1Q,epgs_2Q,error_type="u3"):
-#     F = 1
-#     for i in range(L):
-#         if i % 2 == 0:
-#             # start from qubit 0
-#             ngates = int(n/2)
-#             for j in range(ngates):
-#                 F *= 1 - epgs_1Q[q[2*j]][error_type] * 1.5
-#                 F *= 1 - epgs_1Q[q[2*j+1]][error_type] * 1.5
-#                 F *= 1 - epgs_2Q[(q[2*j],q[2*j+1])] * 1.25
-#             if n%2 == 1:
-#                 F *= 1 - epgs_1Q[q[n-1]][error_type] * 1.5
-#                 # F *= 1 - epgs_1Q[q[n-1]]["u2"] * 1.5
-#                 F *= 1 - epgs_2Q[q[n-1]][error_type] * 1.5
-#         else:
-#             # start from qubit 1
-#             ngates = int((n-1)/2)
-#             for j in range(ngates):
-#                 F *= 1 - epgs_1Q[q[2*j+1]][error_type] * 1.5
-#                 F *= 1 - epgs_1Q[q[2*j+2]][error_type] * 1.5
-#                 F *= 1 - epgs_2Q[(q[2*j+1],q[2*j+2])] * 1.25
-            
-#             F *= 1 - epgs_1Q[q[0]][error_type] * 1.5
-#             # F *= 1 - epgs_1Q[q[0]]["u2"] * 1.5
-#             F *= 1 - epgs_2Q[q[0]][error_type] * 1.5
-#             if n%2 == 0:
-#                 F *= 1 - epgs_1Q[q[n-1]][error_type] * 1.5
-#                 # F *= 1 - epgs_1Q[q[n-1]]["u2"] * 1.5
-#                 F *= 1 - epgs_2Q[q[n-1]][error_type] * 1.5
-#     return F
+#     # sys.exit(0)
