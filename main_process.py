@@ -24,8 +24,14 @@ import itertools
 
 use_density_matrix = False # density matrix based / measurement based simulation
 
-
-filename_label = 'ibmq_experiment_all_20220131_3792580001'
+filename_label = 'ibmq_experiment_all_20220207_0783033829' 
+#filename_label = 'simulation_all_20220207_0138295296' #S1e-2
+#filename_label = 'simulation_all_20220207_1554639290'
+#filename_label = 'simulation_intc_20220207_0182433690'
+#filename_label = 'simulation_all_20220207_8562200401'
+#filename_label = 'simulation_all_20220207_7011425106'
+#filename_label = 'simulation_all_20220207_7738569296'
+#filename_label = 'simulation_all_20220207_7420679527'
 #filename_label = 'ibmq_experiment_all_20220131_3975437641'
 
 with open('data/' + filename_label + '_full', 'rb') as infile:
@@ -82,6 +88,7 @@ result['cb'] = {
     "n_total":  n_total,
     "Lrange":   Lrange,
     "C":        C,
+    "shots":    shots,
     "batch":    1,
     "repeat":   repeat
 }
@@ -133,6 +140,7 @@ result['int_cb'] = {
     "n_total":  n_total,
     "Lrange":   Lrange,
     "C":        C,
+    "shots":    shots,
     "batch":    1,
     "repeat":   repeat
 }
@@ -207,6 +215,9 @@ for k in range(0,len(parity_pauli_sample_list),2):
     dec_stdev_list[pp1[0]] = s1
     dec_stdev_list[pp2[0]] = s2
 
+print("intc_CB")
+# print("Parameters: n = %d, C = %d, " % (n,C), "L = ", str(Lrange))
+
 print("Label / Pauli infidelity / Std(fidelity) / Intercept / Std(intercept)")
 for pauli_label in parity_pauli_sample_list:
     print(str(pauli_label)+" %.5f %.5f %.5f %.5f"%(1-params_list[pauli_label][1], np.sqrt(pcov_list[pauli_label][1,1]), 1-params_list[pauli_label][0], np.sqrt(pcov_list[pauli_label][0,0])))
@@ -225,6 +236,7 @@ result['intc_cb'] = {
     "n_total":      n_total,
     "Lrange":       Lrange,
     "C":            C,
+    "shots":        shots,
     "batch":        1,
     "repeat":       repeat,
     "parity_pauli_sample_list": parity_pauli_sample_list
