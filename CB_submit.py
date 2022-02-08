@@ -7,6 +7,7 @@ from qiskit.extensions import UnitaryGate
 from qiskit.quantum_info import Pauli, Clifford
 from scipy.stats import sem, unitary_group
 from scipy.linalg import sqrtm,expm
+import qiskit.quantum_info as qi
 # IBMQ.save_account('b3460dbc07ed93247ba3dd87b6619d71872d5d079f3f01bd5944678aa544b97203807ffcff040ca6d440ad990d907bbe59489179c190bd7b6670bf432e874940')
 
 # IBMQ.load_account()
@@ -98,10 +99,12 @@ def measure_pauli_1q(circuit,index,pauli=None):
 		assert 1==0
 
 #Miss operations on K
-def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=None,periodic=False,use_density_matrix=False):
+def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=None,periodic=False,use_density_matrix=False,use_reset_error=False):
 	data_save = {}
 	q = qubit_map
 	cb_circ_all = []
+	reset_id = qi.Operator([[1,0],[0,1]])
+
 	for b in range(batch):
 		# data_batch = {}
 		# num_jobs = 0
@@ -118,6 +121,9 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 				gates = QuantumCircuit(n_total,n)  ##### Any difference between n and n total?
 				# circuit.reset([i for i in range(n)])
 				# state preparation
+				if use_reset_error:
+					for j in range(n):
+						state.unitary(reset_id,q[j],label='reset_id')
 				for j in range(n):
 					prepare_pauli_eigenstate_1q(state,q[j],pauli=pauliList[n-1-j])
 					#apply_1q(circuit,q[j],gate = np.expm(pauli_sample[j]))
