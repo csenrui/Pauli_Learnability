@@ -7,6 +7,7 @@ from qiskit.extensions import UnitaryGate
 from qiskit.quantum_info import Pauli, Clifford
 from scipy.stats import sem, unitary_group
 from scipy.linalg import sqrtm,expm
+import qiskit.quantum_info as qi
 # IBMQ.save_account('b3460dbc07ed93247ba3dd87b6619d71872d5d079f3f01bd5944678aa544b97203807ffcff040ca6d440ad990d907bbe59489179c190bd7b6670bf432e874940')
 
 # IBMQ.load_account()
@@ -98,29 +99,32 @@ def measure_pauli_1q(circuit,index,pauli=None):
 		assert 1==0
 
 #Miss operations on K
-def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=None,periodic=False,use_density_matrix=False):
+def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=None,periodic=False,use_density_matrix=False,use_reset_error=False):
 	data_save = {}
 
 	q = qubit_map
 	cb_circ_all = []
 
-	# Correction gates
-	tmp_circ = QuantumCircuit(1)
-	tmp_circ.s(0)
-	C0odd  = Clifford.from_circuit(tmp_circ)
-	tmp_circ = QuantumCircuit(1)
-	tmp_circ.sx(0)
-	C1odd  = Clifford.from_circuit(tmp_circ)
-	tmp_circ = QuantumCircuit(1)
-	tmp_circ.z(0)
-	tmp_circ.s(0)
-	C0even = Clifford.from_circuit(tmp_circ)
-	tmp_circ = QuantumCircuit(1)
-	tmp_circ.s(0)
-	tmp_circ.h(0)
-	tmp_circ.s(0)
-	C1even = Clifford.from_circuit(tmp_circ)
-	Cl = [[C0odd,C1odd],[C0even,C1even]]
+	if use_reset_error:
+		reset_id = qi.Operator([[1,0],[0,1]])
+
+	# # Correction gates
+	# tmp_circ = QuantumCircuit(1)
+	# tmp_circ.s(0)
+	# C0odd  = Clifford.from_circuit(tmp_circ)
+	# tmp_circ = QuantumCircuit(1)
+	# tmp_circ.sx(0)
+	# C1odd  = Clifford.from_circuit(tmp_circ)
+	# tmp_circ = QuantumCircuit(1)
+	# tmp_circ.z(0)
+	# tmp_circ.s(0)
+	# C0even = Clifford.from_circuit(tmp_circ)
+	# tmp_circ = QuantumCircuit(1)
+	# tmp_circ.s(0)
+	# tmp_circ.h(0)
+	# tmp_circ.s(0)
+	# C1even = Clifford.from_circuit(tmp_circ)
+	# Cl = [[C0even,C1even],[C0odd,C1odd]]
 
 
 
@@ -141,6 +145,9 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 				gates = QuantumCircuit(n_total,n)  ##### Any difference between n and n total?
 				# circuit.reset([i for i in range(n)])
 				# state preparation
+				if use_reset_error:
+					for j in range(n):
+						state.unitary(reset_id,q[j],label='reset_id')
 				for j in range(n):
 					prepare_pauli_eigenstate_1q(state,q[j],pauli=pauliList[n-1-j])
 					#apply_1q(circuit,q[j],gate = np.expm(pauli_sample[j]))
@@ -148,14 +155,20 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 
 				for i in range(L):
 					pauliLayer1 = [random.choice(['I','X','Y','Z']) for j in range(n)]
-					pauliLayer2 = [random.choice(['I','X','Y','Z']) for j in range(n)]
+					# pauliLayer2 = [random.choice(['I','X','Y','Z']) for j in range(n)]
 					#pauliTrans = Pauli(''.join(pauliLayer[::-1]))
 					for j in range(n):
 						# gates.pauli(pauliLayer[j],[q[j]])
 
 						# Calculate randomized Clifford
-						cliff = Clifford.from_label(pauliLayer1[j]).dot(Cl[i%2][j%2]).dot(Clifford.from_label(pauliLayer2[j]))
-						gates = gates.compose(cliff.to_circuit(),[q[j]])
+						# cliff = Clifford.from_label(pauliLayer1[j]).dot(Cl[1][j%2])
+						# gates = gates.compose(cliff.to_circuit(),[q[j]])
+						
+						pauli_gate_1q(gates,q[j],pauli=pauliLayer1[j])
+						if j%2 == 0:
+							gates.s(q[j])
+						else:
+							gates.sx(q[j])
 
 
 					ngates = int(n/2)
