@@ -42,7 +42,7 @@ q = qubit_maps['local']
 
 
 ######## simulator or ibmq
-use_simulator = False
+use_simulator = True
 
 
 
@@ -74,9 +74,9 @@ else:
     IBMQ.load_account()
     #provider = IBMQ.enable_account("9f9d2171bf92173c5c222a9f9eacc14e355482aea4571b77c408a3847555cb7ab46fc751f0bbebfa8741c41b29b3bb5332cf18d3bc775c19d7e5f819c840f535",hub='ibm-q-ornl', group='ornl', project='sys-reserve')
 
-    # provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
+    provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
     # provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='sys-reserve')
-    provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
+    # provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
     # backend = provider.get_backend('ibmq_manila')
 
     backend = provider.get_backend('ibm_perth')
@@ -106,7 +106,9 @@ for pauli_sample in pauli_sample_list:
 
     print("created %d circuits" % len(cb_circ_all[0]))
 
-    # print(cb_circ_all[0][0])
+    print(cb_circ_all[0][0])
+    print(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2])[0])
+    sys.exit(0)
     if use_simulator is True:
         job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
         result = job.result()
