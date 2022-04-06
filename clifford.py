@@ -21,7 +21,14 @@ C = quantum_info.Clifford.from_circuit(CNOT)
 # print(C)
 # sys.exit(0)
 
-# C = quantum_info.random_clifford(n,seed=100)
+qc = QuantumCircuit(2)
+qc.cx(0, 1)
+qc.cx(1, 0)
+print(qc)
+C = quantum_info.Clifford.from_circuit(qc)
+
+
+# C = quantum_info.random_clifford(n)
 
 # print(C.to_circuit())
 
@@ -49,10 +56,10 @@ def learnability(n,C):
     weight_transfer = []
     # invariant points
     for p_in in paulis:
-        p_out = Pauli(p_in).evolve(C).to_label()[-n:]
+        p_out = Pauli(p_in).evolve(C.adjoint()).to_label()[-n:]
         evolve_dict[p_in] = p_out
         pattern_dict[p_in] = pattern(p_in)
-        # print(p_in, p_out)
+        print(p_in, p_out)
         # if p_out.equiv(p_in):
         #     invariant.append(p_in.to_label())
         if pattern(p_out) == pattern(p_in):
