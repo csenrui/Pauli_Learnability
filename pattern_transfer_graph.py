@@ -1,13 +1,12 @@
 import numpy as np
 from numpy.linalg import matrix_rank
 import networkx as nx
-import itertools, copy, random, sys, json
+import itertools, copy
 import qiskit
-from qiskit import quantum_info
-from qiskit import QuantumCircuit
-from qiskit.quantum_info import Pauli, PauliList
+from qiskit import quantum_info, QuantumCircuit
+from qiskit.quantum_info import Pauli
 
-n = 2
+n = 3
 CNOT = qiskit.circuit.library.CXGate()
 SWAP = qiskit.circuit.library.SwapGate()
 C = quantum_info.Clifford.from_circuit(SWAP)
@@ -157,12 +156,12 @@ for cycle in cycle_basis_all:
     for i in range(4**n):
         if cycle[i] == 1:
             pauli = int_to_pauli(n,i)
-            s += pauli + ' '
+            s += 'p_' + pauli + ' + '
             v = hadamard(pauli)
             for j in range(4**n):
                 v_cycle[j] += v[j]
     cycle_basis_all.append(v_cycle)
     assert matrix_rank(np.array(cycle_basis_all)) == C_dim
-    print(s)
+    print(s[:-3])
     cycle_basis_all.pop()
 print("all cycle errors are learnable!")
