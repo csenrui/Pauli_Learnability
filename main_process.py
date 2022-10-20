@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import qiskit
 from qiskit import IBMQ, QuantumCircuit, execute
 # from qiskit.providers.aer import StatevectorSimulator, AerSimulator
-from qiskit.providers.aer.noise import NoiseModel, pauli_error, amplitude_damping_error, ReadoutError
+# from qiskit.providers.aer.noise import NoiseModel, pauli_error, amplitude_damping_error, ReadoutError
 from qiskit.qobj.utils import MeasLevel
 from sympy import N
 from qubit_map import qubit_maps

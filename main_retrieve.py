@@ -2,8 +2,6 @@ import numpy as np
 import sys, json, copy, time, pickle
 import qiskit
 from qiskit import IBMQ, QuantumCircuit, execute
-from qiskit.providers.aer import QasmSimulator, StatevectorSimulator
-from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.ibmq.managed import IBMQJobManager
 
 

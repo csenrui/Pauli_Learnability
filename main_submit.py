@@ -5,7 +5,6 @@ import qiskit
 from qiskit import IBMQ, QuantumCircuit, execute
 from qiskit.providers.aer import StatevectorSimulator, AerSimulator
 from qiskit.providers.aer.noise import NoiseModel, pauli_error, amplitude_damping_error, ReadoutError
-from qiskit.providers.aer.noise.errors.errorutils import single_qubit_clifford_gates
 from qiskit.providers.ibmq.managed import IBMQJobManager, ManagedJobSet
 from qiskit.providers.ibmq.apiconstants import ApiJobShareLevel
 from qiskit.qobj.utils import MeasLevel
