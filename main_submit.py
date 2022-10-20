@@ -20,20 +20,20 @@ from qiskit.compiler import transpile
 import CB_submit, CB_corr_submit
 
 
-shots = 200
+shots = 1000
 shots_intc = 2000
 n = 2
 n_total = n
 #Lrange = list(range(2,39,4)) # len = 10
 # Leven = list(range(2,39,4))
 # Lodd = list(range(3,40,4))
-Leven = [2**x for x in range(1,8)]
-Lodd = [(2**x)+1 for x in range(1,8)]
+Leven = [2**x for x in range(1,9)]
+Lodd = [(2**x)+1 for x in range(1,9)]
 #repeat = [1 for k in Lrange] # not-used
 repeat_even = [1 for k in Leven] # not-used
 repeat_odd = [1 for k in Lodd] # not-used
-C = 30
-C_intc = 300
+C = 60
+C_intc = 150
 #C = 1
 batch = 1
 gset = "Pauli"
@@ -42,45 +42,42 @@ q = qubit_maps['local']
 
 
 ######## simulator or ibmq
-use_simulator = True
+use_simulator = False
 
 
+IBMQ.load_account()
 
+# input ibmq credential
+provider = IBMQ.enable_account("...",hub='...', group='...', project='...')
+
+backend = provider.get_backend('ibmq_montreal')
+
+delay_time = backend.properties().gate_length('sx',qubits=q[1]) # in second
+print("delay_time = ",str(delay_time))
+
+# delay_time = 0
+
+print(backend.properties().gate_length('sx',qubits=q[1]))
+
+print(backend.properties().gate_length('x',qubits=q[1]))
+
+# sys.exit(0)
+# delay_time = 0
+# print("no delay")
+
+# print(delay_time)s
+
+# sys.exit(0)
 
 if use_simulator is True:
-    filename = 'simulation_all_20220207'
-    eps = 0.005
-    eps_readout = 0.000
-    eps_reset = 0.0001
-    noise_model = NoiseModel()
-    # gate error
-    amp_noise_1q = amplitude_damping_error(eps)
-    noise_model.add_all_qubit_quantum_error(amp_noise_1q.tensor(amp_noise_1q),['cx'])
-    # readout error
-    p0given1 = eps_readout
-    p1given0 = eps_readout
-    readout_noise_1q = ReadoutError([[1 - p1given0, p1given0], [p0given1, 1 - p0given1]])
-    noise_model.add_all_qubit_readout_error(readout_noise_1q)
-    # reset error
-    #reset_id = qi.Operator([[1,0],[0,1]])
-    reset_noise_1q = pauli_error([('X', eps_reset), ('I', 1 - eps_reset)])
-    noise_model.add_all_qubit_quantum_error(reset_noise_1q, 'reset_id')
-    noise_model.add_basis_gates(['unitary'])
-    print(noise_model.basis_gates)
-    # sys.exit(0)
+    filename = 'simulation_all_20220208'
+    noise_model = NoiseModel.from_backend(provider.get_backend('ibm_perth'))
     backend = AerSimulator(method='density_matrix', noise_model=noise_model)
 else:
-    filename = 'ibmq_experiment_all_20220207'
-    IBMQ.load_account()
-    #provider = IBMQ.enable_account("9f9d2171bf92173c5c222a9f9eacc14e355482aea4571b77c408a3847555cb7ab46fc751f0bbebfa8741c41b29b3bb5332cf18d3bc775c19d7e5f819c840f535",hub='ibm-q-ornl', group='ornl', project='sys-reserve')
-
-    provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
-    # provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='sys-reserve')
-    # provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
-    # backend = provider.get_backend('ibmq_manila')
-
-    backend = provider.get_backend('ibm_perth')
+    filename = 'ibmq_experiment_all_20220228'
     job_manager = IBMQJobManager()
+
+
 
 print("CB, ", "n=%d" % n)
 print("simulation method:", backend.configuration().description)
@@ -102,18 +99,22 @@ for pauli_sample in pauli_sample_list:
     repeat = repeat_even #not used
 
 
-    cb_data, cb_circ_all = CB_submit.submit_cb(n,n_total,Lrange=Lrange,C=C,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False,use_reset_error = use_simulator)
+    cb_data, cb_circ_all = CB_submit.submit_cb(n,n_total,Lrange=Lrange,C=C,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False,use_reset_error = use_simulator,delay_time=delay_time)
+
+    # print(transpile(cb_circ_all[0][0],backend=backend,initial_layout=[0,1],optimization_level=2))
+
+    # sys.exit(0)
 
     print("created %d circuits" % len(cb_circ_all[0]))
 
-    print(cb_circ_all[0][0])
-    print(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2])[0])
-    sys.exit(0)
+
+
     if use_simulator is True:
-        job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
+        # job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
+        job = backend.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[0,1],optimization_level=2), shots=shots_intc, max_parallel_experiments=0, memory = True) 
         result = job.result()
     else:
-        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots, memory=True, backend=backend, name='cb', job_tags=[tag,token])
+        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[0,1],optimization_level=2), shots=shots, memory=True, backend=backend, name='cb', job_tags=[tag,token])
         job_set_id = job_set.job_set_id()
 
     cb_data["parameters"] = {}
@@ -150,26 +151,24 @@ for pauli_sample in pauli_sample_list:
     Lrange = Leven
     repeat = repeat_even #not used
 
-    print(use_simulator)
-
+    #cb_data, cb_circ_all = CB_corr_submit.submit_cb(n,n_total,Lrange=Lrange,C=C,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False,use_reset_error = use_simulator)
     cb_data, cb_circ_all = CB_corr_submit.submit_cb(n,n_total,Lrange=Lrange,C=C,batch=batch, pauliList = pauli_sample, qubit_map=q,gset=gset,repeat=repeat,periodic=False,use_density_matrix=False,use_reset_error = use_simulator)
     print("created %d circuits" % len(cb_circ_all[0]))
 
+    # print(cb_circ_all[0][0])
+    # print(transpile(cb_circ_all[0][0],backend=backend,initial_layout=[0,1],optimization_level=2))
 
 
-    print(transpile(cb_circ_all[0][0],backend=backend,initial_layout=[1,2],optimization_level=3))
-    # sys.exit(0)
-    # print(transpile(cb_circ_all[0][0],backend=backend,initial_layout=[1,2],optimization_level=2))
-
-  
 
     if use_simulator is True:
-        job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True) 
+        # job = backend.run(cb_circ_all[0], shots=shots_intc, max_parallel_experiments=0, memory = True)
+        job = backend.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[0,1],optimization_level=2), shots=shots_intc, max_parallel_experiments=0, memory = True)  
         result = job.result()
     else:
     # print(cb_circ_all[0][0])
-        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2],optimization_level=3), shots=shots, memory=True, backend=backend, name='int_cb', job_tags=[tag,token])
+        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[0,1],optimization_level=2), shots=shots, memory=True, backend=backend, name='int_cb', job_tags=[tag,token])
         job_set_id = job_set.job_set_id()    
+
 
 
     cb_data["parameters"] = {}
@@ -212,7 +211,7 @@ for pauli_sample, parity in parity_pauli_sample_list:
         result = job.result()
     else:
     # print(cb_circ_all[0][0])
-        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[1,2]), shots=shots_intc, memory=True, backend=backend, name='intc_cb', job_tags=[tag,token])
+        job_set = job_manager.run(transpile(cb_circ_all[0],backend=backend,initial_layout=[0,1]), shots=shots_intc, memory=True, backend=backend, name='intc_cb', job_tags=[tag,token])
         job_set_id = job_set.job_set_id()    
 
     cb_data["parameters"] = {}

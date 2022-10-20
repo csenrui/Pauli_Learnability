@@ -99,33 +99,11 @@ def measure_pauli_1q(circuit,index,pauli=None):
 		assert 1==0
 
 #Miss operations on K
-def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=None,periodic=False,use_density_matrix=False,use_reset_error=False):
+def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=None,periodic=False,use_density_matrix=False,use_reset_error=False, delay_time = 0):
 	data_save = {}
-
 	q = qubit_map
 	cb_circ_all = []
-
 	reset_id = qi.Operator([[1,0],[0,1]])
-
-	# # Correction gates
-	# tmp_circ = QuantumCircuit(1)
-	# tmp_circ.s(0)
-	# C0odd  = Clifford.from_circuit(tmp_circ)
-	# tmp_circ = QuantumCircuit(1)
-	# tmp_circ.sx(0)
-	# C1odd  = Clifford.from_circuit(tmp_circ)
-	# tmp_circ = QuantumCircuit(1)
-	# tmp_circ.z(0)
-	# tmp_circ.s(0)
-	# C0even = Clifford.from_circuit(tmp_circ)
-	# tmp_circ = QuantumCircuit(1)
-	# tmp_circ.s(0)
-	# tmp_circ.h(0)
-	# tmp_circ.s(0)
-	# C1even = Clifford.from_circuit(tmp_circ)
-	# Cl = [[C0even,C1even],[C0odd,C1odd]]
-
-
 
 	for b in range(batch):
 		# data_batch = {}
@@ -136,12 +114,12 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 
 		for l in range(len(Lrange)):
 			L = Lrange[l]
-
 			for c in range(C):
 				# run the circuit
 				job_save = {}
 				state = QuantumCircuit(n_total,n)
-				gates = QuantumCircuit(n_total,n)  ##### Any difference between n and n total?
+				gates = QuantumCircuit(n_total,n) 
+				gates_scheduling = QuantumCircuit(n_total,n)
 				# circuit.reset([i for i in range(n)])
 				# state preparation
 				if use_reset_error:
@@ -152,42 +130,42 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 					#apply_1q(circuit,q[j],gate = np.expm(pauli_sample[j]))
 				state.barrier()
 
+
 				for i in range(L):
-					pauliLayer1 = [random.choice(['I','X','Y','Z']) for j in range(n)]
-					# pauliLayer2 = [random.choice(['I','X','Y','Z']) for j in range(n)]
+					pauliLayer = [random.choice(['I','X','Y','Z']) for j in range(n)]
 					#pauliTrans = Pauli(''.join(pauliLayer[::-1]))
 					for j in range(n):
 						# gates.pauli(pauliLayer[j],[q[j]])
+						pauli_gate_1q(gates,q[j],pauli=pauliLayer[j])
+						pauli_gate_1q(gates_scheduling,q[j],pauli=pauliLayer[j])
 
-						# # Calculate randomized Clifford
-						# cliff = Clifford.from_label(pauliLayer1[j]).dot(Cl[1][j%2])
-						# gates = gates.compose(cliff.to_circuit(),[q[j]])
-						
-						# pauli_gate_1q(gates,q[j],pauli=pauliLayer1[j])
+						# discrepancy
 						# if j%2 == 0:
 						# 	gates.s(q[j])
 						# else:
+						# 	#pauli_gate_1q(gates,q[j],pauli='I')
 						# 	gates.sx(q[j])
 
-						# Transpile by hand
-						if j%2 == 0:
-							pauli_gate_1q(gates,q[j],pauli=pauliLayer1[j])
-							gates.s(q[j])
-						elif pauliLayer1[j] == 'X':
-							gates.z(q[j])
-							gates.sx(q[j])
-							gates.z(q[j])
-						else:
-							pauli_gate_1q(gates,q[j],pauli=pauliLayer1[j])
-							gates.sx(q[j])
+					if delay_time != 0:
+						should_delay = True	
+						for pp in pauliLayer:
+							if pp == 'X' or pp == 'Y':
+								should_delay = False
+								break
+						if should_delay is True:
+							gates_scheduling.delay(delay_time,unit='s')
 
-					ngates = int(n/2)
-					for j in range(ngates):
-						gates.cx(q[2*j],q[2*j+1])
-					if n%2 == 1:
-						gates.id(q[n-1])
+					# ngates = int(n/2)
+					# for j in range(ngates):
+					# 	gates.cx(q[2*j],q[2*j+1])
+					# 	gates_scheduling.cx(q[2*j],q[2*j+1])
+					# if n%2 == 1:
+					# 	gates.id(q[n-1])
+					# 	gates_scheduling.id(q[n-1])
+
 
 					gates.barrier()
+					gates_scheduling.barrier()
 					#pauliOp = pauliOp.evolve(pauliTrans).evolve()		
 
 					# start from qubit 0
@@ -206,6 +184,7 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 				for j in range(n):
 					#gates.pauli(pauliLayer[j],[q[j]])
 					pauli_gate_1q(gates,q[j],pauli=pauliLayer[j])
+					pauli_gate_1q(gates_scheduling,q[j],pauli=pauliLayer[j])
 
 
 				# calculate C(P), which decides our measurement setting
@@ -214,7 +193,7 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 				pauliOp = pauliOp.evolve(Clifford(gates).adjoint()) # note: adjoint is necessary for Heisenberg evolution.
 
 
-				circuit = state.compose(gates,range(n))
+				circuit = state.compose(gates_scheduling,range(n))
 				if use_density_matrix:
 					circuit.save_density_matrix()
 				else:

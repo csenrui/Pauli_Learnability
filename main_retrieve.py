@@ -14,7 +14,11 @@ provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
 backend = provider.get_backend('ibm_perth')
 
 
-filename = 'data/' + 'ibmq_experiment_all_20220127_1696837399'
+
+# # filename_label = 'ibmq_experiment_all_20220228_7658906293' #exp2
+# filename_label = 'ibmq_experiment_all_20220228_8530634712' #exp1
+
+filename = 'data/' + 'ibmq_experiment_all_20220228_8530634712' #exp1
 with open(filename, 'rb') as outfile:
     data = pickle.load(outfile)
 token = data["token"]
