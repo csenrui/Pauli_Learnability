@@ -5,10 +5,6 @@ import qiskit
 from qiskit import IBMQ, QuantumCircuit, execute
 # from qiskit.providers.aer import StatevectorSimulator, AerSimulator
 from qiskit.providers.aer.noise import NoiseModel, pauli_error, amplitude_damping_error, ReadoutError
-import qiskit.ignis.verification.randomized_benchmarking as rb
-# from qiskit.providers.aer.noise.errors.errorutils import single_qubit_clifford_gates
-# from qiskit.providers.ibmq.managed import IBMQJobManager, ManagedJobSet
-# sfrom qiskit.providers.ibmq.apiconstants import ApiJobShareLevel
 from qiskit.qobj.utils import MeasLevel
 from sympy import N
 from qubit_map import qubit_maps
@@ -18,15 +14,12 @@ from scipy.stats import sem, unitary_group
 import CB_process
 from statistics import stdev
 import itertools
-# from qiskit.compiler import transpile
 
-#Change test
 
 use_density_matrix = False # density matrix based / measurement based simulation
 
 
-# filename_label = 'ibmq_experiment_all_20220228_7658906293' #exp2
-filename_label = 'ibmq_experiment_all_20220228_8530634712' #exp1
+filename_label = 'ibmq_experiment_all_20220228_8530634712' 
 
 
 with open('data/' + filename_label + '_full', 'rb') as infile:
@@ -60,7 +53,7 @@ for tag in cb:
 
     for sub_label in raw_fidelity_list.keys():
         if sub_label in fidelity_list:
-            continue # wasteful!
+            continue # some data are thrown!
         elif(sub_label == 'I'*n):
             fidelity_list[sub_label] = 1.0
             stdev_list[sub_label] = 0.0
@@ -150,11 +143,7 @@ use_boostrap = False
 C_max = 0
 shots_max = 0
 
-# fidelity_list = {} 
-# stdev_list = {}
-# intercept_list = {}
-# intercept_std_list = {}
-# covar_list = {}
+
 params_list = {}
 pcov_list = {}
 

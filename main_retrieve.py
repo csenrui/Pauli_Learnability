@@ -6,19 +6,14 @@ from qiskit.providers.aer import QasmSimulator, StatevectorSimulator
 from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.ibmq.managed import IBMQJobManager
 
+
+# input ibmq credential
 IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
-# provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='sys-reserve')
-provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
-# backend = provider.get_backend('ibmq_manila')
-backend = provider.get_backend('ibm_perth')
+provider = IBMQ.enable_account("...",hub='...', group='...', project='...')
+backend = provider.get_backend('ibmq_montreal')
 
 
-
-# # filename_label = 'ibmq_experiment_all_20220228_7658906293' #exp2
-# filename_label = 'ibmq_experiment_all_20220228_8530634712' #exp1
-
-filename = 'data/' + 'ibmq_experiment_all_20220228_8530634712' #exp1
+filename = 'data/' + 'ibmq_experiment_all_20220228_8530634712' 
 with open(filename, 'rb') as outfile:
     data = pickle.load(outfile)
 token = data["token"]

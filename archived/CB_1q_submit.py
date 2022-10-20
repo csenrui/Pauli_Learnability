@@ -8,8 +8,7 @@ from qiskit.quantum_info import Pauli, Clifford
 from scipy.stats import sem, unitary_group
 from scipy.linalg import sqrtm,expm
 import qiskit.quantum_info as qi
-# IBMQ.save_account('b3460dbc07ed93247ba3dd87b6619d71872d5d079f3f01bd5944678aa544b97203807ffcff040ca6d440ad990d907bbe59489179c190bd7b6670bf432e874940')
-
+# IBMQ.save_account('...')
 # IBMQ.load_account()
 # provider = IBMQ.get_provider(hub='ibm-q-internal', group='deployed', project='default')
 # backend = provider.get_backend('ibmq_montreal')
