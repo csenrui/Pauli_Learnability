@@ -1,9 +1,11 @@
 # Pauli_Learnability
 The Learnability of Pauli noise
+Senrui Chen, Yunchao Liu, Matthew Otten, Alireza Seif, Bill Fefferman, Liang Jiang
 
-main_CB_int_exp2.py, main_CB_int_post2.py: CB with intercept.
+This repo contains codes for estimate all learnable Pauli errors for a CNOT.
 
-main_CB_exp.py, main_CB_post.py: CB without intercept (fewer measurement settings)
+## How to run
+`main_submit.py`-> `main_retrieve.py`->`main_process.py`->`main_plotting.ipynb`
 
-# Note
+## Note
 Create "/data" before running main_submit.
