@@ -11,14 +11,7 @@ from qiskit.extensions import UnitaryGate
 from scipy.stats import sem, entropy, linregress
 from scipy.optimize import curve_fit
 from qiskit.quantum_info import Pauli, Clifford
-# IBMQ.save_account('b3460dbc07ed93247ba3dd87b6619d71872d5d079f3f01bd5944678aa544b97203807ffcff040ca6d440ad990d907bbe59489179c190bd7b6670bf432e874940')
 
-# IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-internal', group='deployed', project='default')
-# backend = provider.get_backend('ibmq_athens')
-# backend = StatevectorSimulator()
-
-# Lrange = list(range(1,16))
 
 def process_CB(n, C, shots, batch, Lrange, cb_data, pauli_sample, pauli_request_set = None, counts_batch=None, repeat=None, periodic=False, use_density_matrix = False,intercept_cb = False, C_max = 0, shots_max = 0, use_boostrap = False):
 

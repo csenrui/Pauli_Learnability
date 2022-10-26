@@ -8,56 +8,7 @@ from qiskit.quantum_info import Pauli, Clifford
 from scipy.stats import sem, unitary_group
 from scipy.linalg import sqrtm,expm
 import qiskit.quantum_info as qi
-# IBMQ.save_account('b3460dbc07ed93247ba3dd87b6619d71872d5d079f3f01bd5944678aa544b97203807ffcff040ca6d440ad990d907bbe59489179c190bd7b6670bf432e874940')
 
-# IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-internal', group='deployed', project='default')
-# backend = provider.get_backend('ibmq_montreal')
-
-# print(backend.job_limit())
-# sys.exit(0)
-# print(backend.properties())
-
-# I = np.array([[1,0],[0,1]])
-# X = np.array([[0,1],[1,0]])
-# Y = np.array([[0,-1j],[1j,0]])
-# Z = np.array([[1,0],[0,-1]])
-# T = np.array([[1,0],[0,np.exp(1j*np.pi/4)]])
-# #H = np.array([[1/np.sqrt(2),1/np.sqrt(2)],[1/np.sqrt(2),-1/np.sqrt(2)]])
-# CZ = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,-1]])
-# CX = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
-# SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])
-# sqrtX = sqrtm(X)
-# sqrtY = sqrtm(Y)
-# sqrtZ = sqrtm(Z) #Phase gate
-# sqrtW = sqrtm((X+Y)/np.sqrt(2))
-# H = (X+Z)/np.sqrt(2)
-# S = sqrtZ
-# SH = S@H
-
-# #Stabilizer representation of CNOT
-# CNOT = Clifford.from_dict(
-
-# )
-
-
-# def apply_1q_random(circuit,index,gset="sqrtPauli",record_gates=None):
-# 	# here index is the physical index on hardware
-# 	if gset == "Pauli":
-# 		gate = random.choice(['X','Y','Z'])
-# 	circuit.pauli(gate, [index])
-# 	if record_gates is not None:
-# 		record_gates.append(gate)
-
-
-# def apply_random_pauli_1q(circuit,index):
-# 	pass
-
-# def apply_1q(circuit,index,record_gates=None,gate=None):
-# 	assert gate is not None
-# 	circuit.unitary(UnitaryGate(gate), [index])
-# 	if record_gates is not None:
-# 		record_gates.append(gate)
 
 def prepare_pauli_eigenstate_1q(circuit,index,pauli=None):
 	if pauli == 'I':
