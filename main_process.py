@@ -70,7 +70,6 @@ for pauli_label in pauli_request_list:
     print(pauli_label+" %.6f, %.6f"%(1-fidelity_list[pauli_label], stdev_list[pauli_label]))
 
 result['cb'] = {
-    "raw_fidelity": raw_fidelity_list,
     "fidelity": fidelity_list,
     "stdev":    stdev_list,
     "n":        n,
@@ -123,7 +122,6 @@ for pauli_label in pauli_request_list:
 
 
 result['int_cb'] = {
-    "raw_fidelity": raw_fidelity_list,
     "fidelity": fidelity_list,
     "stdev":    stdev_list,
     "n":        n,
@@ -211,7 +209,6 @@ for pauli_label in parity_pauli_sample_list:
     print(str(pauli_label[0])+" %.5f %.5f"%(1-dec_fidelity_list[pauli_label[0]],dec_stdev_list[pauli_label[0]]))
 
 result['intc_cb'] = {
-    "raw_fidelity": raw_fidelity_list,
     "params":       params_list,
     "pcov":         pcov_list,
     "dec_fidelity": dec_fidelity_list,
