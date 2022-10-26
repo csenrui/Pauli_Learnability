@@ -8,56 +8,7 @@ from qiskit.quantum_info import Pauli, Clifford
 from scipy.stats import sem, unitary_group
 from scipy.linalg import sqrtm,expm
 import qiskit.quantum_info as qi
-# IBMQ.save_account('b3460dbc07ed93247ba3dd87b6619d71872d5d079f3f01bd5944678aa544b97203807ffcff040ca6d440ad990d907bbe59489179c190bd7b6670bf432e874940')
 
-# IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-internal', group='deployed', project='default')
-# backend = provider.get_backend('ibmq_montreal')
-
-# print(backend.job_limit())
-# sys.exit(0)
-# print(backend.properties())
-
-# I = np.array([[1,0],[0,1]])
-# X = np.array([[0,1],[1,0]])
-# Y = np.array([[0,-1j],[1j,0]])
-# Z = np.array([[1,0],[0,-1]])
-# T = np.array([[1,0],[0,np.exp(1j*np.pi/4)]])
-# #H = np.array([[1/np.sqrt(2),1/np.sqrt(2)],[1/np.sqrt(2),-1/np.sqrt(2)]])
-# CZ = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,-1]])
-# CX = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
-# SWAP = np.array([[1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])
-# sqrtX = sqrtm(X)
-# sqrtY = sqrtm(Y)
-# sqrtZ = sqrtm(Z) #Phase gate
-# sqrtW = sqrtm((X+Y)/np.sqrt(2))
-# H = (X+Z)/np.sqrt(2)
-# S = sqrtZ
-# SH = S@H
-
-# #Stabilizer representation of CNOT
-# CNOT = Clifford.from_dict(
-
-# )
-
-
-# def apply_1q_random(circuit,index,gset="sqrtPauli",record_gates=None):
-# 	# here index is the physical index on hardware
-# 	if gset == "Pauli":
-# 		gate = random.choice(['X','Y','Z'])
-# 	circuit.pauli(gate, [index])
-# 	if record_gates is not None:
-# 		record_gates.append(gate)
-
-
-# def apply_random_pauli_1q(circuit,index):
-# 	pass
-
-# def apply_1q(circuit,index,record_gates=None,gate=None):
-# 	assert gate is not None
-# 	circuit.unitary(UnitaryGate(gate), [index])
-# 	if record_gates is not None:
-# 		record_gates.append(gate)
 
 def prepare_pauli_eigenstate_1q(circuit,index,pauli=None):
 	if pauli == 'I':
@@ -179,15 +130,6 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 					gates.barrier()
 					#pauliOp = pauliOp.evolve(pauliTrans).evolve()		
 
-					# start from qubit 0
-					# ngates = int(n/2)
-					# for j in range(ngates):
-					# 	apply_1q_random(circuit,q[2*j],gset=gset,record_gates=gates)
-					# 	apply_1q_random(circuit,q[2*j+1],gset=gset,record_gates=gates)
-					# 	circuit.cx(q[2*j],q[2*j+1])
-					# if n%2 == 1:
-					# 	apply_1q_random(circuit,q[n-1],gset=gset,record_gates=gates)
-					# 	circuit.id(q[n-1])
 
 				# final layer:
 				pauliLayer = [random.choice(['I','X','Y','Z']) for j in range(n)]
@@ -256,41 +198,3 @@ def submit_cb(n,n_total,Lrange,C,batch,pauliList,qubit_map,gset="Pauli",repeat=N
 		data_save["batch_%d" % b] = data_batch
 	return data_save, cb_circ_all
 
-	# sys.exit(0)
-
-	# job_manager = IBMQJobManager()
-	# job_set = job_manager.run(circuits, backend, shots=8192)
-	# job_set_id = job_set.job_set_id()
-
-
-
-	# data = {}
-	# data["data"] = data_save
-	# data["job_set_id"] = job_set_id
-
-# sio.savemat("data_cross_entropy_3_H.mat", data)
-
-# with open('data_cross_entropy_4_H_5', 'wb') as outfile:
-#     pickle.dump(data, outfile)
-
-
-# print(gates)
-# print(len(gates))
-# sys.exit(0)
-
-# circuit.decompose().decompose().draw(output="mpl",filename="circuit.png")
-
-# print(circuit.depth())
-
-# sys.exit(0)
-
-
-# job = execute(circuit, backend, shots=8192)
-# job_id = job.job_id()
-# result = job.result()
-# # vec = result.get_statevector()
-
-# print(result)
-# sys.exit(0)
-
-# submit_rcs(5,5,[6],1,1,{0:0,1:1,2:2,3:3,4:4},gset="Haar")
