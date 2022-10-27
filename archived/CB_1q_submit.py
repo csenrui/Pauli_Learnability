@@ -9,9 +9,6 @@ from scipy.stats import sem, unitary_group
 from scipy.linalg import sqrtm,expm
 import qiskit.quantum_info as qi
 # IBMQ.save_account('...')
-# IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-internal', group='deployed', project='default')
-# backend = provider.get_backend('ibmq_montreal')
 
 # print(backend.job_limit())
 # sys.exit(0)
