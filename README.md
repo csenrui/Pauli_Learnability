@@ -1,9 +1,15 @@
 # Pauli_Learnability
 The Learnability of Pauli noise
 
-main_CB_int_exp2.py, main_CB_int_post2.py: CB with intercept.
+Senrui Chen, Yunchao Liu, Matthew Otten, Alireza Seif, Bill Fefferman, Liang Jiang
 
-main_CB_exp.py, main_CB_post.py: CB without intercept (fewer measurement settings)
+arXiv: 2206.06362
 
-# Note
-Create "/data" before running main_submit.
+[Link](https://arxiv.org/abs/2206.06362)
+
+## How to run
+`main_submit.py`-> `main_retrieve.py`->`main_process.py`->`main_plotting.ipynb`
+
+## Note
+- Create "/data" before running.
+- Data from the paper is in the ZIP file and should be run with `qiskit==0.31.0`

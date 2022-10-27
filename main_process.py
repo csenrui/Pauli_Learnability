@@ -4,11 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import qiskit
 from qiskit import IBMQ, QuantumCircuit, execute
 # from qiskit.providers.aer import StatevectorSimulator, AerSimulator
-from qiskit.providers.aer.noise import NoiseModel, pauli_error, amplitude_damping_error, ReadoutError
-import qiskit.ignis.verification.randomized_benchmarking as rb
-# from qiskit.providers.aer.noise.errors.errorutils import single_qubit_clifford_gates
-# from qiskit.providers.ibmq.managed import IBMQJobManager, ManagedJobSet
-# sfrom qiskit.providers.ibmq.apiconstants import ApiJobShareLevel
+# from qiskit.providers.aer.noise import NoiseModel, pauli_error, amplitude_damping_error, ReadoutError
 from qiskit.qobj.utils import MeasLevel
 from sympy import N
 from qubit_map import qubit_maps
@@ -18,21 +14,13 @@ from scipy.stats import sem, unitary_group
 import CB_process
 from statistics import stdev
 import itertools
-# from qiskit.compiler import transpile
 
-#Change test
 
 use_density_matrix = False # density matrix based / measurement based simulation
 
-filename_label = 'ibmq_experiment_all_20220207_0783033829' 
-#filename_label = 'simulation_all_20220207_0138295296' #S1e-2
-#filename_label = 'simulation_all_20220207_1554639290'
-#filename_label = 'simulation_intc_20220207_0182433690'
-#filename_label = 'simulation_all_20220207_8562200401'
-#filename_label = 'simulation_all_20220207_7011425106'
-#filename_label = 'simulation_all_20220207_7738569296'
-#filename_label = 'simulation_all_20220207_7420679527'
-#filename_label = 'ibmq_experiment_all_20220131_3975437641'
+
+filename_label = 'ibmq_experiment_all_20220323_8530634712' 
+
 
 with open('data/' + filename_label + '_full', 'rb') as infile:
     data = pickle.load(infile)
@@ -65,7 +53,7 @@ for tag in cb:
 
     for sub_label in raw_fidelity_list.keys():
         if sub_label in fidelity_list:
-            continue # wasteful!
+            continue # some data are thrown!
         elif(sub_label == 'I'*n):
             fidelity_list[sub_label] = 1.0
             stdev_list[sub_label] = 0.0
@@ -155,11 +143,7 @@ use_boostrap = False
 C_max = 0
 shots_max = 0
 
-# fidelity_list = {} 
-# stdev_list = {}
-# intercept_list = {}
-# intercept_std_list = {}
-# covar_list = {}
+
 params_list = {}
 pcov_list = {}
 
@@ -214,9 +198,6 @@ for k in range(0,len(parity_pauli_sample_list),2):
     dec_fidelity_list[pp2[0]] = lambda2
     dec_stdev_list[pp1[0]] = s1
     dec_stdev_list[pp2[0]] = s2
-
-print("intc_CB")
-# print("Parameters: n = %d, C = %d, " % (n,C), "L = ", str(Lrange))
 
 print("Label / Pauli infidelity / Std(fidelity) / Intercept / Std(intercept)")
 for pauli_label in parity_pauli_sample_list:

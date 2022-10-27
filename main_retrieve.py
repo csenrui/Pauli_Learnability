@@ -2,19 +2,16 @@ import numpy as np
 import sys, json, copy, time, pickle
 import qiskit
 from qiskit import IBMQ, QuantumCircuit, execute
-from qiskit.providers.aer import QasmSimulator, StatevectorSimulator
-from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.ibmq.managed import IBMQJobManager
 
+
+# input ibmq credential
 IBMQ.load_account()
-# provider = IBMQ.get_provider(hub='ibm-q-research', group='berkeley-6', project='main')
-# provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='sys-reserve')
-provider = IBMQ.get_provider(hub='ibm-q-ornl', group='ornl', project='phy164')
-# backend = provider.get_backend('ibmq_manila')
-backend = provider.get_backend('ibm_perth')
+provider = IBMQ.enable_account("...",hub='...', group='...', project='...')
+backend = provider.get_backend('ibmq_montreal')
 
 
-filename = 'data/' + 'ibmq_experiment_all_20220127_1696837399'
+filename = 'data/' + 'ibmq_experiment_all_20220323_8530634712' 
 with open(filename, 'rb') as outfile:
     data = pickle.load(outfile)
 token = data["token"]
