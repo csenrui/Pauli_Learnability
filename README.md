@@ -1,9 +1,9 @@
 # Pauli_Learnability
-_The Learnability of Pauli noise_
+The Learnability of Pauli noise
 
-_Senrui Chen, Yunchao Liu, Matthew Otten, Alireza Seif, Bill Fefferman, Liang Jiang_
+Senrui Chen, Yunchao Liu, Matthew Otten, Alireza Seif, Bill Fefferman, Liang Jiang
 
-_arXiv: 2206.06362_
+arXiv: 2206.06362
 
 [Link](https://arxiv.org/abs/2206.06362)
 
