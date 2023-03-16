@@ -3,7 +3,7 @@ The Learnability of Pauli noise
 
 Senrui Chen, Yunchao Liu, Matthew Otten, Alireza Seif, Bill Fefferman, Liang Jiang
 
-Nature Communications **14**, 52 (2023) [Link](https://www.nature.com/articles/s41467-022-35759-4)
+_Nature Communications **14**, 52 (2023)_ [Link](https://www.nature.com/articles/s41467-022-35759-4)
 
 [arXiv](https://arxiv.org/abs/2206.06362)
 
