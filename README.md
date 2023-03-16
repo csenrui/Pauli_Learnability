@@ -3,9 +3,9 @@ The Learnability of Pauli noise
 
 Senrui Chen, Yunchao Liu, Matthew Otten, Alireza Seif, Bill Fefferman, Liang Jiang
 
-arXiv: 2206.06362
+Nature Communications **14**, 52 (2023) [Link](https://www.nature.com/articles/s41467-022-35759-4)
 
-[Link](https://arxiv.org/abs/2206.06362)
+[arXiv](https://arxiv.org/abs/2206.06362)
 
 ## How to run
 `main_submit.py`-> `main_retrieve.py`->`main_process.py`->`main_plotting.ipynb`
